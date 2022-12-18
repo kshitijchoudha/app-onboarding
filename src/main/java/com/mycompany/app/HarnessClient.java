@@ -1,4 +1,4 @@
-package src.main.java.com;
+package com.mycompany.app;
 import java.io.IOException;
 import java.net.*;
 import java.net.http.*;
