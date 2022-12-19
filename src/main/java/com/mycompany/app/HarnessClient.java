@@ -15,8 +15,8 @@ public class HarnessClient {
 
     HarnessClient harnessClient = new HarnessClient();
     //harnessClient.createHarnessEnvironment("auto-env-1");
-    //harnessClient.createHarnessInfraDefinition("auto-infra-def-env-1", "autoenv1");
-    harnessClient.createHarnessK8SConnector("auto-k8s-connector-kind", "k8s-kind-mac-delegate");
+    harnessClient.createHarnessInfraDefinition("auto-infra-def-env-1", "autoenv1", "NativeHelm", "default");
+    //harnessClient.createHarnessK8SConnector("auto-k8s-connector-kind", "k8s-kind-mac-delegate");
     
   }
 
@@ -59,21 +59,33 @@ public class HarnessClient {
     return response.body();
   }
 
-  public String createHarnessInfraDefinition(String infraDefName, String envName) throws IOException, InterruptedException{
+  public String createHarnessInfraDefinition(String infraDefName, String envRef, String deploymentType, String nameSpace) throws IOException, InterruptedException{
 
     var httpClient = HttpClient.newBuilder().build();
 
-    var payload = String.join("\n"
-      , "{"
+    var payload = String.join("",
+      "{"
       , " \"identifier\": \""+infraDefName.replace("-", "")+"\","
       , " \"orgIdentifier\": \""+HarnessClient.orgId+"\","
       , " \"projectIdentifier\": \""+HarnessClient.projectId+"\","
-      , " \"environmentRef\": \""+envName+"\","
+      , " \"environmentRef\": \""+envRef+"\","
       , " \"name\": \""+infraDefName+"\","
       , " \"type\": \"KubernetesDirect\","
-      , " \"yaml\": \"{deploymentType: NativeHelm, spec: {connectorRef: k8skindconnector, namespace: default, releaseName: release-<+INFRA_KEY>}}\""
+      , " \"deploymentType\": \""+deploymentType+"\","
+      , " \"yaml\": \"infrastructureDefinition:\\n"
+      ," name: test-1\\n identifier: test1\\n description: \\\"\\\"\\n"
+      ," tags: {}\\n orgIdentifier: default\\n projectIdentifier: Default_Project_1671068007356\\n"
+      ," environmentRef: "+envRef+"\\n"
+      ," deploymentType: "+deploymentType+"\\n"
+      ," type: KubernetesDirect\\n"
+      ," spec:\\n"
+      ,"  connectorRef: k8skindconnector\\n"
+      ,"  namespace: "+nameSpace+"\\n"
+      ,"  releaseName: release-<+INFRA_KEY>\\n"
+      ," allowSimultaneousDeployments: false\\n\""
       , "}"
     );
+    
     System.out.println(payload);
 
     HashMap<String, String> params = new HashMap<>();
@@ -110,8 +122,7 @@ public class HarnessClient {
       , "  \"orgIdentifier\": \""+HarnessClient.orgId+"\","
       , "  \"projectIdentifier\": \""+HarnessClient.projectId+"\","
       , "  \"tags\": {"
-      , "   \"property1\": \"string\","
-      , "   \"property2\": \"string\""
+      , "   \"servicename\": \"autotest\""
       , "  },"
       , "  \"type\": \"K8sCluster\","
       , "  \"spec\": {"
